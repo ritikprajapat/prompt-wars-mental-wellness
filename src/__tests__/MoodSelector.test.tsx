@@ -1,16 +1,18 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import MoodSelector from "@/components/MoodSelector";
+import { render, screen, fireEvent } from '@testing-library/react';
+import MoodSelector from '@/components/MoodSelector';
 
-describe("MoodSelector", () => {
-  it("renders 5 radio buttons and selects correctly", () => {
+describe('MoodSelector', () => {
+  it('renders 5 radio buttons and selects correctly', () => {
     const onChange = jest.fn();
     render(<MoodSelector value={3} onChange={onChange} />);
 
-    const options = screen.getAllByRole("radio");
+    const options = screen.getAllByRole('radio');
     expect(options).toHaveLength(5);
-    expect(options[2]).toHaveAttribute("aria-checked", "true");
+    expect(options[2]).toHaveAttribute('aria-checked', 'true');
 
-    fireEvent.click(options[4]);
+    const lastOption = options[4];
+    expect(lastOption).toBeDefined();
+    fireEvent.click(lastOption as HTMLElement);
     expect(onChange).toHaveBeenCalledWith(5);
   });
 });

@@ -1,3 +1,5 @@
+import 'server-only';
+
 type RateRecord = { count: number; reset: number };
 const store = new Map<string, RateRecord>();
 

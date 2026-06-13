@@ -1,4 +1,10 @@
-export type ExamType = "NEET" | "JEE" | "CUET" | "CAT" | "GATE" | "UPSC";
+export type ExamType = 'NEET' | 'JEE' | 'CUET' | 'CAT' | 'GATE' | 'UPSC';
+
+/** Burnout risk classification returned by the analysis model. */
+export type RiskLevel = 'low' | 'moderate' | 'high';
+
+/** What primarily brings an aspirant to the app, captured at onboarding. */
+export type PrimaryConcern = 'stress' | 'burnout' | 'motivation';
 
 export interface JournalEntry {
   id: string;
@@ -13,7 +19,7 @@ export interface JournalEntry {
 export interface AnalysisResult {
   summary: string;
   dominantEmotion: string;
-  riskLevel: "low" | "moderate" | "high";
+  riskLevel: RiskLevel;
   stressTriggers: string[];
   patterns: string[];
   copingStrategies: string[];
@@ -23,21 +29,27 @@ export interface AnalysisResult {
 
 export interface ChatMessage {
   id: string;
-  sender: "user" | "aarav";
+  sender: 'user' | 'aarav';
   text: string;
   timestamp: string;
 }
 
-export interface AnalyzeApiInput {
-  examType: ExamType;
-  mood: number;
-  stress: number;
-  studyHours: number;
-  journal: string;
-  pastTrend: Array<{ date: string; mood: number; stress: number }>;
+/** Single prior turn supplied to the chat API for context. */
+export interface ChatHistoryItem {
+  sender: 'user' | 'aarav';
+  text: string;
 }
 
-export interface ChatApiInput {
-  message: string;
-  riskLevel: "low" | "moderate" | "high";
+/** Onboarding profile persisted to local storage and injected into prompts. */
+export interface UserProfile {
+  name: string;
+  examType: ExamType;
+  examDate: string;
+  primaryConcern: PrimaryConcern;
+}
+
+export interface TrendPoint {
+  date: string;
+  mood: number;
+  stress: number;
 }

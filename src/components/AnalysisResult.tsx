@@ -1,14 +1,12 @@
-"use client";
+'use client';
 
-import type { AnalysisResult } from "@/lib/types";
-import Badge from "./ui/Badge";
-import Card from "./ui/Card";
+import { memo } from 'react';
+import type { AnalysisResult } from '@/lib/types';
+import { getRiskColor, getRiskLabel } from '@/lib/utils';
+import Badge from './ui/Badge';
+import Card from './ui/Card';
 
-export default function AnalysisResult({
-  analysis,
-}: {
-  analysis: AnalysisResult | null;
-}) {
+function AnalysisResult({ analysis }: { analysis: AnalysisResult | null }) {
   if (!analysis) {
     return (
       <Card>
@@ -17,7 +15,10 @@ export default function AnalysisResult({
             ✦
           </span>
           <div>
-            <h2 className="font-display text-xl font-bold text-slate-900">
+            <h2
+              tabIndex={-1}
+              className="font-display text-xl font-bold text-slate-900 outline-none"
+            >
               AI analysis
             </h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -39,7 +40,10 @@ export default function AnalysisResult({
               ✦
             </span>
             <div>
-              <h2 className="font-display text-xl font-bold text-slate-900">
+              <h2
+                tabIndex={-1}
+                className="font-display text-xl font-bold text-slate-900 outline-none"
+              >
                 AI analysis
               </h2>
               <p className="mt-0.5 text-sm text-slate-500">
@@ -58,13 +62,32 @@ export default function AnalysisResult({
             <p className="mt-2 text-slate-700">{analysis.summary}</p>
           </div>
 
+          <div
+            role={analysis.riskLevel === 'high' ? 'alert' : 'status'}
+            aria-atomic="true"
+            className="rounded-3xl border border-slate-100 bg-white/60 p-4"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-500">
+              Burnout risk
+            </p>
+            <p
+              className={`mt-2 text-lg font-bold ${getRiskColor(analysis.riskLevel)}`}
+            >
+              {getRiskLabel(analysis.riskLevel)}
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Based on mood, stress, triggers, and recurring patterns from this
+              check-in.
+            </p>
+          </div>
+
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-3xl border border-slate-100 bg-white/60 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-500">
                 Stress triggers
               </p>
               <ul className="mt-2 list-disc space-y-2 pl-5 text-slate-700 marker:text-violet-400">
-                {analysis.stressTriggers.map((trigger) => (
+                {analysis.stressTriggers.map(trigger => (
                   <li key={trigger}>{trigger}</li>
                 ))}
               </ul>
@@ -74,7 +97,7 @@ export default function AnalysisResult({
                 Patterns
               </p>
               <ul className="mt-2 list-disc space-y-2 pl-5 text-slate-700 marker:text-violet-400">
-                {analysis.patterns.map((pattern) => (
+                {analysis.patterns.map(pattern => (
                   <li key={pattern}>{pattern}</li>
                 ))}
               </ul>
@@ -86,7 +109,7 @@ export default function AnalysisResult({
               Coping strategies
             </p>
             <ul className="mt-2 list-disc space-y-2 pl-5 text-slate-700 marker:text-violet-400">
-              {analysis.copingStrategies.map((strategy) => (
+              {analysis.copingStrategies.map(strategy => (
                 <li key={strategy}>{strategy}</li>
               ))}
             </ul>
@@ -108,3 +131,5 @@ export default function AnalysisResult({
     </Card>
   );
 }
+
+export default memo(AnalysisResult);

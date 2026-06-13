@@ -8,13 +8,13 @@ Built with **Next.js 14 (App Router)**, **React 18**, **TypeScript**, **Tailwind
 
 ## Features
 
-| Feature | What it does |
-| --- | --- |
-| **Daily check-in** | Capture exam type, study hours, mood (1–5), stress (1–5), and a free-text journal entry. |
-| **AI analysis** | Gemini returns a structured summary, dominant emotion, risk level, stress triggers, patterns, coping strategies, and a next action. |
-| **Companion chat** | Streaming, supportive replies from "Aarav". High-risk messages surface the iCall helpline. |
-| **Pattern chart** | Local mood/stress history (last 7 entries) with progress bars and a table. |
-| **Coping strategies** | Always-available, evidence-aligned self-help steps. |
+| Feature               | What it does                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Daily check-in**    | Capture exam type, study hours, mood (1–5), stress (1–5), and a free-text journal entry.                                            |
+| **AI analysis**       | Gemini returns a structured summary, dominant emotion, risk level, stress triggers, patterns, coping strategies, and a next action. |
+| **Companion chat**    | Streaming, supportive replies from "Aarav". High-risk messages surface the iCall helpline.                                          |
+| **Pattern chart**     | Local mood/stress history (last 7 entries) with progress bars and a table.                                                          |
+| **Coping strategies** | Always-available, evidence-aligned self-help steps.                                                                                 |
 
 ---
 
@@ -54,9 +54,9 @@ npm run dev                        # http://localhost:3000
 
 ### Environment
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `GEMINI_API_KEY` | ✅ | Get one at https://aistudio.google.com/apikey. A free-tier key with `limit: 0` will return HTTP 429 — the UI surfaces this clearly. |
+| Variable         | Required | Notes                                                                                                                               |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY` | ✅       | Get one at https://aistudio.google.com/apikey. A free-tier key with `limit: 0` will return HTTP 429 — the UI surfaces this clearly. |
 
 ### Scripts
 
@@ -74,7 +74,7 @@ npm run test    # Jest + React Testing Library
 
 - **Code Quality** — small, single-responsibility modules; `lib/` is framework-agnostic and unit-tested; Zod is the one source of validation truth; JSDoc on non-obvious helpers.
 - **Security** — server-only API key; strict CSP + `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; input sanitisation (HTML + prompt-injection); per-IP rate limiting; bounded input lengths; upstream errors mapped to safe status codes.
-- **Efficiency** — streaming chat replies (parsed server-side, appended in place — no per-chunk re-renders); memoised derived state; font `preconnect`; bounded local history (30 entries).
+- **Efficiency** — streaming chat replies (parsed server-side, appended in place — no per-chunk re-renders); `React.memo` on pure components + `useMemo` for derived data; self-hosted, preloaded fonts via `next/font` (no render-blocking external request); bounded local history (30 entries).
 - **Testing** — Jest unit + component tests covering schema validation, sanitisation, rate limiting, prompt building, SSE parsing, storage, and key components.
 - **Accessibility** — semantic landmarks, skip link, `radiogroup` mood picker with arrow-key support, labelled inputs, `role="log"` live chat, `aria-busy` on async buttons, WCAG-AA contrast, and `prefers-reduced-motion` support.
 

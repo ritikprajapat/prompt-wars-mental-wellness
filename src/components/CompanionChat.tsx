@@ -1,15 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import { ChatMessage, AnalysisResult } from "@/lib/types";
-import LoadingDots from "./ui/LoadingDots";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MAX_MESSAGE_LENGTH } from '@/lib/constants';
+import { ChatMessage, AnalysisResult, UserProfile } from '@/lib/types';
+import { getMoodEmoji } from '@/lib/utils';
+import LoadingDots from './ui/LoadingDots';
 
-export default function CompanionChat({
-  analysis,
-}: {
+interface CompanionChatProps {
   analysis: AnalysisResult | null;
-}) {
-  const [message, setMessage] = useState("");
+  profile: UserProfile;
+  currentMood: number;
+}
+
+function CompanionChat({ analysis, profile, currentMood }: CompanionChatProps) {
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,70 +24,109 @@ export default function CompanionChat({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
 
+  const introMessage = useMemo(
+    () =>
+      `Hi ${profile.name}, I'm Aarav. I know ${profile.examType} prep can feel intense, and today's mood looks like ${getMoodEmoji(
+        currentMood
+      )}. Tell me what would help right now.`,
+    [currentMood, profile.examType, profile.name]
+  );
   const awaitingReply =
-    loading && messages[messages.length - 1]?.sender === "user";
+    loading && messages[messages.length - 1]?.sender === 'user';
+  const isDisabled = loading || message.trim().length === 0;
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setLoading(true);
+  const handleMessageChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setMessage(event.target.value);
+    },
+    []
+  );
 
-    const outgoing = message.trim();
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      sender: "user",
-      text: outgoing,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((current) => [...current, userMessage]);
-    setMessage("");
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setError(null);
+      setLoading(true);
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: outgoing,
-          riskLevel: analysis?.riskLevel ?? "low",
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Chat failed");
+      const outgoing = message.trim();
+      if (!outgoing) {
+        setLoading(false);
+        return;
       }
-      if (!response.body) throw new Error("No stream body");
+      const userMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        sender: 'user',
+        text: outgoing,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(current => [...current, userMessage]);
+      setMessage('');
 
-      // Reserve a single, stable reply bubble and append deltas in place.
-      const replyId = crypto.randomUUID();
-      setMessages((current) => [
-        ...current,
-        {
-          id: replyId,
-          sender: "aarav",
-          text: "",
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: outgoing,
+            riskLevel: analysis?.riskLevel ?? 'low',
+            history: messages.map(item => ({
+              sender: item.sender,
+              text: item.text,
+            })),
+            profile,
+          }),
+        });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let text = "";
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Chat failed');
+        }
+        if (!response.body) throw new Error('No stream body');
 
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        text += decoder.decode(value, { stream: true });
-        setMessages((current) =>
-          current.map((m) => (m.id === replyId ? { ...m, text } : m)),
-        );
+        // Reserve a single, stable reply bubble and append deltas in place.
+        const replyId = crypto.randomUUID();
+        setMessages(current => [
+          ...current,
+          {
+            id: replyId,
+            sender: 'aarav',
+            text: '',
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let text = '';
+
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          text += decoder.decode(value, { stream: true });
+          setMessages(current =>
+            current.map(m => (m.id === replyId ? { ...m, text } : m))
+          );
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [analysis?.riskLevel, message, messages, profile]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        if (!isDisabled) {
+          event.currentTarget.form?.requestSubmit();
+        }
+      }
+    },
+    [isDisabled]
+  );
 
   return (
     <section className="glass animate-fade-up rounded-4xl p-6 text-slate-700 sm:p-7">
@@ -92,7 +135,11 @@ export default function CompanionChat({
           A
         </span>
         <div>
-          <h2 className="font-display text-xl font-bold text-slate-900">
+          <h2
+            id="chat-heading"
+            tabIndex={-1}
+            className="font-display text-xl font-bold text-slate-900 outline-none"
+          >
             Companion chat
           </h2>
           <p className="text-sm text-slate-500">
@@ -109,30 +156,30 @@ export default function CompanionChat({
         className="mt-6 max-h-80 space-y-3 overflow-y-auto scroll-smooth rounded-3xl border border-slate-100 bg-white/60 p-4"
       >
         {messages.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-500">
-            No messages yet — say hello to start the conversation. 💬
+          <p className="py-6 text-center text-sm text-slate-600">
+            {introMessage}
           </p>
         ) : (
-          messages.map((msg) => {
-            const isAarav = msg.sender === "aarav";
+          messages.map(msg => {
+            const isAarav = msg.sender === 'aarav';
             return (
               <div
                 key={msg.id}
-                className={`flex ${isAarav ? "justify-start" : "justify-end"}`}
+                className={`flex ${isAarav ? 'justify-start' : 'justify-end'}`}
               >
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
                     isAarav
-                      ? "rounded-tl-sm bg-white text-slate-700 shadow-sm ring-1 ring-slate-100"
-                      : "rounded-tr-sm bg-gradient-to-br from-brand-600 to-accent-600 text-white shadow-soft"
+                      ? 'rounded-tl-sm bg-white text-slate-700 shadow-sm ring-1 ring-slate-100'
+                      : 'rounded-tr-sm bg-gradient-to-br from-brand-600 to-accent-600 text-white shadow-soft'
                   }`}
                 >
                   <p
-                    className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${isAarav ? "text-violet-400" : "text-white/70"}`}
+                    className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${isAarav ? 'text-violet-400' : 'text-white/70'}`}
                   >
-                    {isAarav ? "Aarav" : "You"}
+                    {isAarav ? 'Aarav' : 'You'}
                   </p>
-                  {isAarav && msg.text === "" ? (
+                  {isAarav && msg.text === '' ? (
                     <span className="mt-1 inline-block text-violet-400">
                       <LoadingDots />
                     </span>
@@ -158,27 +205,29 @@ export default function CompanionChat({
           <span className="sr-only">Message</span>
           <textarea
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                if (!loading && message.trim().length > 0) {
-                  e.currentTarget.form?.requestSubmit();
-                }
-              }
-            }}
+            onChange={handleMessageChange}
+            onKeyDown={handleKeyDown}
             rows={2}
+            maxLength={MAX_MESSAGE_LENGTH}
+            aria-label="Message Aarav"
+            aria-describedby="chat-limit-hint"
             placeholder="Type a message…  (Enter to send, Shift+Enter for a new line)"
             className="w-full resize-none rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-500 focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
           />
+          <span
+            id="chat-limit-hint"
+            className="mt-1 block text-xs text-slate-500"
+          >
+            {message.length}/{MAX_MESSAGE_LENGTH} characters
+          </span>
         </label>
         <button
           type="submit"
-          disabled={loading || message.trim().length === 0}
+          disabled={isDisabled}
           aria-busy={loading}
           className="inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-brand-600 to-accent-600 px-5 text-sm font-semibold text-white shadow-soft transition hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
         >
-          {loading ? <LoadingDots /> : "Send"}
+          {loading ? <LoadingDots /> : 'Send'}
         </button>
       </form>
 
@@ -193,3 +242,5 @@ export default function CompanionChat({
     </section>
   );
 }
+
+export default memo(CompanionChat);
