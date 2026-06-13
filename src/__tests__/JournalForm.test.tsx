@@ -16,7 +16,7 @@ describe("JournalForm", () => {
         onSaveEntries={mockOnSaveEntries}
       />,
     );
-    const button = screen.getByRole("button", { name: /analyze journal/i });
+    const button = screen.getByRole("button", { name: /analyze/i });
     expect(button).toBeDisabled();
   });
 
@@ -30,7 +30,7 @@ describe("JournalForm", () => {
     const textarea = screen.getByRole("textbox");
     fireEvent.change(textarea, { target: { value: "Today was productive." } });
 
-    const button = screen.getByRole("button", { name: /analyze journal/i });
+    const button = screen.getByRole("button", { name: /analyze/i });
     expect(button).not.toBeDisabled();
   });
 });

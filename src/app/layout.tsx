@@ -1,9 +1,27 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  title: "mental-wellness",
-  description: "A Next.js mental wellness journal and companion chat app.",
+  title: {
+    default: "Mental Wellness — Journal, Insights & Companion Chat",
+    template: "%s · Mental Wellness",
+  },
+  description:
+    "A calm space for exam aspirants to journal daily, receive gentle AI insights into emotional patterns, and chat with a supportive companion.",
+  keywords: [
+    "mental wellness",
+    "journal",
+    "exam stress",
+    "mood tracker",
+    "student wellbeing",
+  ],
+  applicationName: "Mental Wellness",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8b5cf6",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -13,6 +31,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-screen font-sans text-slate-800 antialiased">
         <div className="aurora" aria-hidden="true" />
         <a

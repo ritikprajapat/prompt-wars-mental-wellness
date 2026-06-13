@@ -1,1 +1,25 @@
-import { render, screen } from '@testing-library/react';\nimport AnalysisResult from '@/components/AnalysisResult';\n\ndescribe('AnalysisResult', () => {\n  it('renders empty state when no analysis', () => {\n    render(<AnalysisResult analysis={null} />);\n    expect(screen.getByText(/Analyze your journal/i)).toBeInTheDocument();\n  });\n\n  it('displays risk level badge for high risk', () => {\n    const analysis = {\n      summary: 'You seem overwhelmed.',\n      dominantEmotion: 'anxiety',\n      riskLevel: 'high' as const,\n      stressTriggers: ['Time pressure'],\n      patterns: ['Procrastination'],\n      copingStrategies: ['Break tasks down'],\n      motivationalMessage: 'You can do this.',\n      nextAction: 'Take a 5-minute break',\n    };\n\n    render(<AnalysisResult analysis={analysis} />);\n    expect(screen.getByText('high')).toBeInTheDocument();\n  });\n});\n
+import { render, screen } from "@testing-library/react";
+import AnalysisResult from "@/components/AnalysisResult";
+
+describe("AnalysisResult", () => {
+  it("renders empty state when no analysis", () => {
+    render(<AnalysisResult analysis={null} />);
+    expect(screen.getByText(/Analyze your journal/i)).toBeInTheDocument();
+  });
+
+  it("displays risk level badge for high risk", () => {
+    const analysis = {
+      summary: "You seem overwhelmed.",
+      dominantEmotion: "anxiety",
+      riskLevel: "high" as const,
+      stressTriggers: ["Time pressure"],
+      patterns: ["Procrastination"],
+      copingStrategies: ["Break tasks down"],
+      motivationalMessage: "You can do this.",
+      nextAction: "Take a 5-minute break",
+    };
+
+    render(<AnalysisResult analysis={analysis} />);
+    expect(screen.getByText("high")).toBeInTheDocument();
+  });
+});

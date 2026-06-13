@@ -1,4 +1,5 @@
 import { getEntries, saveEntry, clearEntries } from "@/lib/storage";
+import type { JournalEntry } from "@/lib/types";
 
 describe("storage helpers", () => {
   beforeEach(() => {
@@ -6,7 +7,7 @@ describe("storage helpers", () => {
   });
 
   it("saves and retrieves entries", () => {
-    const entry = {
+    const entry: JournalEntry = {
       id: "1",
       examType: "NEET",
       mood: 3,
@@ -20,7 +21,7 @@ describe("storage helpers", () => {
   });
 
   it("clears entries", () => {
-    saveEntry({
+    const entry: JournalEntry = {
       id: "1",
       examType: "JEE",
       mood: 3,
@@ -28,7 +29,8 @@ describe("storage helpers", () => {
       studyHours: 4,
       journal: "test",
       date: "2026-06-13",
-    });
+    };
+    saveEntry(entry);
     clearEntries();
     expect(getEntries()).toEqual([]);
   });

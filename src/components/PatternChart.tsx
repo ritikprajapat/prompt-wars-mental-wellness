@@ -3,9 +3,6 @@
 import { JournalEntry } from "@/lib/types";
 
 export default function PatternChart({ entries }: { entries: JournalEntry[] }) {
-  const labels = entries
-    .slice(0, 7)
-    .map((entry) => new Date(entry.date).toLocaleDateString());
   const moodPoints = entries.slice(0, 7).map((entry) => entry.mood);
   const stressPoints = entries.slice(0, 7).map((entry) => entry.stress);
 
@@ -18,7 +15,18 @@ export default function PatternChart({ entries }: { entries: JournalEntry[] }) {
         Mood and stress over recent entries.
       </p>
 
-      <div className="mt-6 space-y-4">
+      {entries.length === 0 ? (
+        <div className="mt-6 rounded-3xl border border-dashed border-violet-200 bg-white/50 px-4 py-10 text-center">
+          <p className="text-3xl">🌱</p>
+          <p className="mt-2 text-sm font-medium text-slate-600">
+            No entries yet
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Save your first journal to start seeing your patterns here.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-3xl border border-slate-100 bg-white/60 p-4">
             <div className="mb-2 flex items-center justify-between text-sm font-medium text-slate-500">
@@ -56,7 +64,7 @@ export default function PatternChart({ entries }: { entries: JournalEntry[] }) {
         <div className="overflow-x-auto rounded-3xl border border-slate-100 bg-white/60">
           <table className="min-w-full text-left text-sm text-slate-600">
             <thead>
-              <tr className="border-b border-slate-100 text-xs uppercase tracking-wider text-slate-400">
+              <tr className="border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500">
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Mood</th>
                 <th className="px-4 py-3 font-semibold">Stress</th>
@@ -79,7 +87,8 @@ export default function PatternChart({ entries }: { entries: JournalEntry[] }) {
             </tbody>
           </table>
         </div>
-      </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -9,7 +9,14 @@ export async function POST(request: Request) {
     request.headers.get("x-forwarded-for") ||
     request.headers.get("host") ||
     "unknown";
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (body === null || typeof body !== "object") {
+    return NextResponse.json(
+      { error: "Request body must be valid JSON" },
+      { status: 400 },
+    );
+  }
+
   const sanitized = { ...body, journal: sanitize(String(body.journal || "")) };
   const parsed = analyzeApiSchema.safeParse(sanitized);
 

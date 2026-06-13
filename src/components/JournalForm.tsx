@@ -5,8 +5,9 @@ import { EXAM_TYPES } from "@/lib/constants";
 import { JournalEntry, AnalysisResult } from "@/lib/types";
 import { saveEntry } from "@/lib/storage";
 import MoodSelector from "./MoodSelector";
-import ProgressBar from "./ui/ProgressBar";
 import LoadingDots from "./ui/LoadingDots";
+
+const STRESS_LABELS = ["Very low", "Low", "Moderate", "High", "Very high"];
 
 export default function JournalForm({
   onAnalysis,
@@ -130,17 +131,26 @@ export default function JournalForm({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="space-y-2 text-sm font-medium text-slate-600">
-            Stress level
+          <label className="space-y-3 text-sm font-medium text-slate-600">
+            <span className="flex items-center justify-between">
+              Stress level
+              <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-600">
+                {STRESS_LABELS[stress - 1]}
+              </span>
+            </span>
             <input
               type="range"
               min={1}
               max={5}
               value={stress}
               onChange={(e) => setStress(Number(e.target.value))}
+              aria-label="Stress level"
               className="w-full"
             />
-            <ProgressBar label="Stress" value={stress} max={5} />
+            <span className="flex justify-between text-[11px] font-normal text-slate-500">
+              <span>Calm</span>
+              <span>Overwhelmed</span>
+            </span>
           </label>
 
           <label className="space-y-2 text-sm font-medium text-slate-600">
@@ -151,9 +161,11 @@ export default function JournalForm({
               rows={6}
               maxLength={2000}
               placeholder="How did today feel? What's weighing on you?"
-              className="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
+              className="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-500 focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
             />
-            <p className="text-xs text-slate-400">
+            <p
+              className={`text-xs ${journal.length > 1800 ? "font-medium text-amber-500" : "text-slate-500"}`}
+            >
               {journal.length}/2000 characters
             </p>
           </label>
@@ -171,6 +183,7 @@ export default function JournalForm({
         <button
           type="submit"
           disabled={isDisabled}
+          aria-busy={loading}
           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-600 to-accent-600 px-5 py-3.5 text-sm font-semibold text-white shadow-soft transition hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:w-auto"
         >
           {loading ? <LoadingDots /> : "Analyze my journal"}

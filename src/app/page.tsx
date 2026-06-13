@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import JournalForm from "@/components/JournalForm";
 import AnalysisResult from "@/components/AnalysisResult";
 import CompanionChat from "@/components/CompanionChat";
@@ -15,10 +15,20 @@ import { getEntries } from "@/lib/storage";
 export default function HomePage() {
   const [analysis, setAnalysis] = useState<AnalysisResultType | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const analysisRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setEntries(getEntries());
   }, []);
+
+  useEffect(() => {
+    if (analysis) {
+      analysisRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [analysis]);
 
   return (
     <main
@@ -46,7 +56,9 @@ export default function HomePage() {
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-8">
           <JournalForm onAnalysis={setAnalysis} onSaveEntries={setEntries} />
-          <AnalysisResult analysis={analysis} />
+          <div ref={analysisRef} className="scroll-mt-6">
+            <AnalysisResult analysis={analysis} />
+          </div>
           <CompanionChat analysis={analysis} />
         </section>
 

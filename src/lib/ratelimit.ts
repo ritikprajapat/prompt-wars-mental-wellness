@@ -1,6 +1,15 @@
 type RateRecord = { count: number; reset: number };
 const store = new Map<string, RateRecord>();
 
+/**
+ * Fixed-window, in-memory rate limiter keyed by an arbitrary identifier
+ * (typically `${route}-${ip}`). Suitable for a single instance; swap for a
+ * shared store (e.g. Redis) when running multiple instances.
+ *
+ * @param key      Unique bucket identifier.
+ * @param limit    Maximum requests allowed within the window.
+ * @param windowMs Window length in milliseconds.
+ */
 export function rateLimit(key: string, limit: number, windowMs: number) {
   const now = Date.now();
   const record = store.get(key);

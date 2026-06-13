@@ -1,6 +1,11 @@
 const promptInjectionPatterns = [
-  /\b(please ignore your instructions|ignore.*previous|disregard.*instructions|forget.*your instructions)\b/gi,
-  /\b(system message|system prompt|developer message|prompt injection)\b/gi,
+  // "ignore / disregard / forget / override … instructions / prompt / rules / context"
+  /\b(?:please\s+)?(ignore|disregard|forget|override|bypass)\b[^.\n]{0,40}?\b(instructions?|prompts?|rules?|previous|prior|above|context|system)\b/gi,
+  /\b(system|developer)\s+(message|prompt|instructions?)\b/gi,
+  /\bprompt\s+injection\b/gi,
+  // Role-play / jailbreak framings
+  /\byou\s+are\s+now\b/gi,
+  /\bact\s+as\s+(an?\s+)?(?:dan|jailbreak|unfiltered|unrestricted)\b/gi,
 ];
 
 export function sanitize(input: string): string {
@@ -12,5 +17,6 @@ export function sanitize(input: string): string {
   promptInjectionPatterns.forEach((pattern) => {
     sanitized = sanitized.replace(pattern, "");
   });
-  return sanitized.trim().slice(0, 2000);
+  // Collapse whitespace left behind by removals, then bound the length.
+  return sanitized.replace(/[ \t]{2,}/g, " ").trim().slice(0, 2000);
 }

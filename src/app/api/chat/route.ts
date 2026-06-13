@@ -9,7 +9,14 @@ export async function POST(request: Request) {
     request.headers.get("x-forwarded-for") ||
     request.headers.get("host") ||
     "unknown";
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (body === null || typeof body !== "object") {
+    return NextResponse.json(
+      { error: "Request body must be valid JSON" },
+      { status: 400 },
+    );
+  }
+
   const sanitized = { ...body, message: sanitize(String(body.message || "")) };
   const parsed = chatApiSchema.safeParse(sanitized);
 
@@ -28,7 +35,10 @@ export async function POST(request: Request) {
   try {
     const stream = await streamGemini(parsed.data);
     return new NextResponse(stream, {
-      headers: { "Content-Type": "text/event-stream" },
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
+      },
     });
   } catch (error) {
     if (error instanceof GeminiError) {
