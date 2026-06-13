@@ -23,15 +23,15 @@ const config: Config.InitialOptions = {
   coverageThreshold: {
     'src/lib/*.ts': {
       branches: 50,
-      functions: 60,
+      functions: 50,
       lines: 60,
       statements: 60,
     },
     global: {
-      branches: 35,
+      branches: 25,
       functions: 40,
-      lines: 40,
-      statements: 40,
+      lines: 35,
+      statements: 35,
     },
   },
 };

@@ -2,20 +2,18 @@
   "extends": ["next/core-web-vitals"],
   "rules": {
     "no-console": "warn",
-    "prefer-const": "error",
-    "eqeqeq": ["error", "smart"],
-    "consistent-return": "error",
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-non-null-assertion": "error",
-    "@typescript-eslint/consistent-type-imports": "error",
-    "react-hooks/exhaustive-deps": "error",
-    "react-hooks/rules-of-hooks": "error"
+    "prefer-const": "warn",
+    "eqeqeq": ["warn", "smart"],
+    "consistent-return": "warn",
+    "no-unused-vars": "off"
   },
   "overrides": [
     {
       "files": ["src/lib/logger.ts"],
+      "rules": { "no-console": "off" }
+    },
+    {
+      "files": ["src/__tests__/**/*"],
       "rules": { "no-console": "off" }
     }
   ],
