@@ -1,14 +1,16 @@
-// jsdom does not provide these Web APIs; back them with Node's implementations
-// at runtime without importing their (conflicting) types.
-const g = globalThis as Record<string, unknown>;
-const nodeUtil = require("util");
-const nodeStreamWeb = require("stream/web");
-g.TextEncoder ??= nodeUtil.TextEncoder;
-g.TextDecoder ??= nodeUtil.TextDecoder;
-g.ReadableStream ??= nodeStreamWeb.ReadableStream;
-g.TransformStream ??= nodeStreamWeb.TransformStream;
-
+import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from "util";
+import {
+  ReadableStream as NodeReadableStream,
+  TransformStream as NodeTransformStream,
+} from "stream/web";
 import { sseToTextStream } from "@/lib/gemini";
+
+// jsdom does not provide these Web APIs; back them with Node's implementations.
+const g = globalThis as Record<string, unknown>;
+g.TextEncoder ??= NodeTextEncoder;
+g.TextDecoder ??= NodeTextDecoder;
+g.ReadableStream ??= NodeReadableStream;
+g.TransformStream ??= NodeTransformStream;
 
 /** Builds a ReadableStream that emits the given strings as UTF-8 chunks. */
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
